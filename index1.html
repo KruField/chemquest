@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry Quest ⚗️</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e17; --surface: #1a1928; --card: #22213a; --border: #2e2d4a;
+  --gold: #FFD600; --gold2: #ffb700; --text: #e8e6f0; --muted: #8884aa;
+  --green: #22d48a; --purple: #9b72ff; --coral: #ff6b5b;
+  --teal: #30d5c8; --amber: #ffaa33; --blue: #4da8ff; --red: #ff4d4d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.stars-bg { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.star-dot { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--d,3s) infinite var(--delay,0s); }
+@keyframes twinkle { 0%,100%{opacity:0.1} 50%{opacity:0.6} }
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: rgba(15,14,23,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 16px; }
+.logo { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 2px; }
+.logo span { color: var(--text); font-size: 12px; font-weight: 700; display: block; letter-spacing: 0; }
+.header-center { flex: 1; }
+.name-inputs { display: flex; gap: 8px; align-items: center; }
+.name-inputs input { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 12px; outline: none; }
+.name-inputs input:focus { border-color: var(--purple); }
+.name-inputs input::placeholder { color: var(--muted); }
+.name-inputs label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.xp-display { text-align: right; }
+.xp-num { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: var(--gold); line-height: 1; text-shadow: 0 0 20px rgba(255,214,0,0.5); transition: transform 0.15s; }
+.xp-num.pop { transform: scale(1.3); }
+.xp-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 1px; }
+.xp-bar-wrap { width: 120px; height: 6px; background: var(--border); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.xp-bar { height: 100%; background: linear-gradient(90deg, var(--gold2), var(--gold)); border-radius: 3px; width: 0%; transition: width 0.6s cubic-bezier(.34,1.56,.64,1); }
+.teacher-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Sarabun', sans-serif; font-size: 11px; padding: 6px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.teacher-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+/* TEACHER BANNER */
+.teacher-banner { display: none; background: rgba(155,114,255,0.15); border-bottom: 1px solid rgba(155,114,255,0.4); padding: 6px 20px; text-align: center; font-size: 11px; color: var(--purple); font-weight: 600; position: sticky; top: 65px; z-index: 99; }
+.teacher-banner.visible { display: block; }
+
+/* MAIN */
+.main { max-width: 820px; margin: 0 auto; padding: 20px 16px 60px; position: relative; z-index: 1; }
+
+/* MISSION */
+.mission { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 20px; }
+.mission-left { flex: 1; }
+.mission-tag { font-family: 'Orbitron', sans-serif; font-size: 9px; color: var(--gold); letter-spacing: 2px; margin-bottom: 8px; }
+.mission-steps { font-size: 13px; line-height: 2.1; color: var(--muted); }
+.mission-steps b { color: var(--text); }
+.step-num { display: inline-block; width: 20px; height: 20px; background: var(--gold); color: var(--bg); border-radius: 50%; font-size: 10px; font-weight: 700; text-align: center; line-height: 20px; margin-right: 6px; }
+.divider-v { width: 1px; background: var(--border); flex-shrink: 0; }
+.example-box { min-width: 220px; }
+.example-tag { font-size: 9px; color: var(--green); letter-spacing: 1px; font-weight: 700; margin-bottom: 8px; }
+.ex-zone { background: rgba(192,72,32,0.2); border: 1px solid rgba(192,72,32,0.4); border-radius: 10px; overflow: hidden; }
+.ex-head { background: rgba(192,72,32,0.5); padding: 6px 10px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; }
+.ex-body { padding: 8px 10px; }
+.ex-row { margin-bottom: 5px; }
+.ex-q { font-size: 9px; color: rgba(255,255,255,0.5); margin-bottom: 2px; }
+.ex-a { font-size: 11px; color: var(--text); }
+
+/* ZONES */
+.zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.zone { background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); position: relative; transition: border-color 0.3s; }
+.zone.complete { border-color: var(--gold); }
+.zone.complete::after { content: '✓'; position: absolute; top: 8px; right: 10px; color: var(--gold); font-size: 14px; font-weight: 700; }
+.zone-head { padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+.zone-icon { font-size: 18px; }
+.zone-title-wrap { flex: 1; }
+.zone-name { font-size: 13px; font-weight: 700; }
+.zone-xp-badge { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(0,0,0,0.3); }
+.zone-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; }
+.field textarea { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 12.5px; resize: none; height: 48px; outline: none; transition: border-color 0.2s; line-height: 1.5; }
+.field textarea:focus { border-color: var(--purple); }
+.field textarea.has-value { border-color: rgba(34,212,138,0.5); }
+.field textarea:disabled { opacity: 0.65; cursor: not-allowed; }
+.zone-stars { display: flex; gap: 4px; margin-top: 4px; }
+.zone-star { font-size: 18px; filter: grayscale(1) brightness(0.3); transition: filter 0.3s; }
+.zone-star.lit { filter: none; animation: starPop 0.3s cubic-bezier(.34,1.56,.64,1); }
+@keyframes starPop { 0%{transform:scale(0.5)} 100%{transform:scale(1)} }
+.zone-xp-earned { font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--gold); margin-left: auto; }
+
+/* TEACHER GRADE PANEL */
+.grade-panel { display: none; background: rgba(155,114,255,0.08); border: 1px solid rgba(155,114,255,0.3); border-radius: 10px; padding: 10px 12px; margin-top: 4px; }
+.grade-panel.visible { display: block; }
+.grade-label { font-size: 10px; color: var(--purple); font-weight: 600; margin-bottom: 6px; }
+.star-picker { display: flex; gap: 8px; margin-bottom: 8px; }
+.star-btn { font-size: 22px; background: none; border: none; cursor: pointer; filter: grayscale(1) brightness(0.3); transition: filter 0.15s, transform 0.15s; padding: 0; line-height: 1; }
+.star-btn.active { filter: none; }
+.star-btn:hover { transform: scale(1.2); filter: none; }
+.grade-comment { width: 100%; background: var(--surface); border: 1px solid rgba(155,114,255,0.3); border-radius: 6px; padding: 6px 8px; color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 11px; resize: none; height: 36px; outline: none; }
+.comment-display { font-size: 11px; color: var(--purple); font-style: italic; margin-top: 4px; min-height: 0; }
+
+/* zone colors */
+.zone-kitchen .zone-head { background: rgba(216,90,48,0.25); } .zone-kitchen .zone-name { color: #ff8c6e; } .zone-kitchen .zone-xp-badge { color: #ff8c6e; }
+.zone-bathroom .zone-head { background: rgba(29,158,117,0.25); } .zone-bathroom .zone-name { color: var(--teal); } .zone-bathroom .zone-xp-badge { color: var(--teal); }
+.zone-home .zone-head { background: rgba(212,138,32,0.25); } .zone-home .zone-name { color: var(--amber); } .zone-home .zone-xp-badge { color: var(--amber); }
+.zone-nature .zone-head { background: rgba(123,94,167,0.25); } .zone-nature .zone-name { color: var(--purple); } .zone-nature .zone-xp-badge { color: var(--purple); }
+.zone-food .zone-head { background: rgba(55,138,221,0.25); } .zone-food .zone-name { color: var(--blue); } .zone-food .zone-xp-badge { color: var(--blue); }
+.zone-bonus .zone-head { background: rgba(255,214,0,0.15); } .zone-bonus .zone-name { color: var(--gold); } .zone-bonus .zone-xp-badge { color: var(--gold); }
+.zone-bonus { grid-column: 1/-1; }
+.zone-bonus .zone-body { flex-direction: row; gap: 14px; flex-wrap: wrap; }
+.zone-bonus .zone-body > .field { flex: 1; min-width: 180px; }
+.zone-bonus .bottom-row { width: 100%; }
+
+/* SCOREBOARD */
+.scoreboard { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.score-title { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--gold); letter-spacing: 2px; text-align: center; margin-bottom: 16px; }
+.score-zones { display: grid; grid-template-columns: repeat(6,1fr); gap: 8px; margin-bottom: 16px; }
+.score-zone-item { text-align: center; }
+.score-zone-icon { font-size: 20px; margin-bottom: 4px; }
+.score-zone-name { font-size: 9px; color: var(--muted); margin-bottom: 4px; }
+.score-zone-stars { font-size: 13px; min-height: 18px; }
+.score-zone-pts { font-family: 'Orbitron', sans-serif; font-size: 11px; color: var(--gold); margin-top: 2px; }
+.total-row { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+.total-xp { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(255,214,0,0.4); }
+.total-grade { font-size: 13px; font-weight: 700; margin-top: 4px; }
+.rank-badge { background: var(--border); color: var(--bg); border-radius: 10px; padding: 6px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; width: 300px; text-align: center; }
+.modal-icon { font-size: 32px; margin-bottom: 12px; }
+.modal-title { font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--gold); letter-spacing: 1px; margin-bottom: 6px; }
+.modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.modal-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-family: 'Sarabun', sans-serif; font-size: 16px; text-align: center; outline: none; letter-spacing: 4px; margin-bottom: 8px; }
+.modal-input:focus { border-color: var(--purple); }
+.modal-input.err { border-color: var(--red); animation: shake 0.3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.modal-err { font-size: 11px; color: var(--red); margin-bottom: 10px; min-height: 16px; }
+.modal-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Sarabun', sans-serif; font-size: 13px; font-weight: 700; background: var(--purple); color: white; margin-bottom: 8px; }
+.modal-btn:hover { opacity: 0.85; }
+.modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green); color: var(--bg); font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 30px; opacity: 0; transition: all 0.3s cubic-bezier(.34,1.56,.64,1); z-index: 998; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.float-xp { position: fixed; pointer-events: none; font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(255,214,0,0.8); animation: floatUp 1.2s forwards; z-index: 999; }
+@keyframes floatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-80px)} }
+@media(max-width:600px) { .zones{grid-template-columns:1fr} .zone-bonus .zone-body{flex-direction:column} .score-zones{grid-template-columns:repeat(3,1fr)} .mission{flex-direction:column} }
+.submit-area { text-align: center; margin-bottom: 20px; }
+.submit-btn { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; letter-spacing: 1px; background: var(--green); color: var(--bg); border: none; border-radius: 14px; padding: 14px 48px; cursor: pointer; transition: transform 0.15s, opacity 0.2s; box-shadow: 0 0 28px rgba(34,212,138,0.4); }
+.submit-btn:hover { transform: scale(1.04); }
+.submit-btn:active { transform: scale(0.97); }
+.submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+.submitted-banner { display: none; background: rgba(34,212,138,0.1); border: 1px solid rgba(34,212,138,0.35); border-radius: 14px; padding: 18px 24px; text-align: center; margin-bottom: 20px; }
+.submitted-banner.visible { display: block; }
+.sub-icon { font-size: 30px; margin-bottom: 6px; }
+.sub-title { font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--green); letter-spacing: 1px; margin-bottom: 4px; }
+.sub-detail { font-size: 12px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="stars-bg" id="stars"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="pw-modal">
+  <div class="modal">
+    <div class="modal-icon">🔐</div>
+    <div class="modal-title">TEACHER MODE</div>
+    <div class="modal-sub">ใส่รหัสผ่านครูเพื่อเข้าโหมดตรวจ</div>
+    <input class="modal-input" id="pw-input" type="password" placeholder="••••" maxlength="20" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="modal-err" id="pw-err"></div>
+    <button class="modal-btn" onclick="checkPw()">เข้าสู่โหมดครู</button>
+    <button class="modal-btn modal-cancel" onclick="closeModal()">ยกเลิก</button>
+  </div>
+</div>
+
+<!-- TEACHER BANNER -->
+<div class="teacher-banner" id="teacher-banner">
+  🟣 โหมดครู (ตรวจงาน) &nbsp;|&nbsp;
+  <span style="cursor:pointer;text-decoration:underline" onclick="exitTeacher()">ออกจากโหมดครู</span>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">⚗️ CHEMISTRY<span>QUEST</span></div>
+  <div class="header-center">
+    <div class="name-inputs">
+      <label>ชื่อ</label><input id="inp-name" type="text" placeholder="ชื่อ–นามสกุล" style="width:150px">
+      <label>ชั้น</label><input id="inp-class" type="text" placeholder="ม.2/1" style="width:62px">
+      <label>เลขที่</label><input id="inp-num" type="text" placeholder="1" style="width:42px">
+    </div>
+  </div>
+  <button class="teacher-btn" id="teacher-btn" onclick="openModal()">🔐 โหมดครู</button>
+  <div class="xp-display">
+    <div class="xp-num" id="total-xp">0</div>
+    <div class="xp-label">XP / 300</div>
+    <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar"></div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- MISSION -->
+  <div class="mission">
+    <div class="mission-left">
+      <div class="mission-tag">📋 ภารกิจของคุณ</div>
+      <div class="mission-steps">
+        <div><span class="step-num">1</span>เลือก <b>1 สิ่ง</b> ที่พบในแต่ละโซน แล้วเขียนลงในช่อง</div>
+        <div><span class="step-num">2</span>บอก <b>เคมีที่เกิดขึ้น</b> เช่น เกิดฟอง / เปลี่ยนสี / ได้กลิ่น</div>
+        <div><span class="step-num">3</span>ตอบ <b>ย้อนกลับได้ไหม?</b> พร้อมเหตุผล</div>
+        <div>⭐ &nbsp;ดาวจะขึ้นหลังจาก<b>ครูตรวจ</b>ให้คะแนนแล้ว — ทำให้ครบทุกโซนนะ!</div>
+      </div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="example-box">
+      <div class="example-tag">✅ ตัวอย่าง</div>
+      <div class="ex-zone">
+        <div class="ex-head"><span>🍳 ห้องครัว</span><span>⭐⭐⭐</span></div>
+        <div class="ex-body">
+          <div class="ex-row"><div class="ex-q">สิ่งที่พบ:</div><div class="ex-a">ไข่ไก่ที่ต้มในหม้อ</div></div>
+          <div class="ex-row"><div class="ex-q">เคมีที่เกิดขึ้น:</div><div class="ex-a">ความร้อนทำให้โปรตีนแข็งตัว</div></div>
+          <div class="ex-row"><div class="ex-q">ย้อนกลับได้ไหม?</div><div class="ex-a">ไม่ได้ เพราะโปรตีนเปลี่ยนโครงสร้างถาวร</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONES -->
+  <div class="zones">
+
+    <!-- Kitchen -->
+    <div class="zone zone-kitchen" id="zone-kitchen">
+      <div class="zone-head"><span class="zone-icon">🍳</span><div class="zone-title-wrap"><div class="zone-name">ห้องครัว</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่ฉันพบ</div><textarea id="kitchen-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เกิดขึ้น</div><textarea id="kitchen-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ย้อนกลับได้ไหม? เพราะอะไร?</div><textarea id="kitchen-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div style="display:flex;align-items:center;">
+          <div class="zone-stars" id="stars-kitchen"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+          <div class="zone-xp-earned" id="xp-kitchen"></div>
+        </div>
+        <div class="grade-panel" id="gp-kitchen">
+          <div class="grade-label">ให้คะแนน (กดดาว)</div>
+          <div class="star-picker" id="pk-kitchen"><button class="star-btn" onclick="setStars('kitchen',1)">⭐</button><button class="star-btn" onclick="setStars('kitchen',2)">⭐</button><button class="star-btn" onclick="setStars('kitchen',3)">⭐</button></div>
+          <textarea class="grade-comment" id="cm-kitchen" placeholder="ความคิดเห็นครู..." oninput="updateComment('kitchen')"></textarea>
+        </div>
+        <div class="comment-display" id="cd-kitchen"></div>
+      </div>
+    </div>
+
+    <!-- Bathroom -->
+    <div class="zone zone-bathroom" id="zone-bathroom">
+      <div class="zone-head"><span class="zone-icon">🧴</span><div class="zone-title-wrap"><div class="zone-name">ห้องน้ำ</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่ฉันพบ</div><textarea id="bathroom-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เกิดขึ้น</div><textarea id="bathroom-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ย้อนกลับได้ไหม? เพราะอะไร?</div><textarea id="bathroom-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div style="display:flex;align-items:center;">
+          <div class="zone-stars" id="stars-bathroom"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+          <div class="zone-xp-earned" id="xp-bathroom"></div>
+        </div>
+        <div class="grade-panel" id="gp-bathroom">
+          <div class="grade-label">ให้คะแนน (กดดาว)</div>
+          <div class="star-picker" id="pk-bathroom"><button class="star-btn" onclick="setStars('bathroom',1)">⭐</button><button class="star-btn" onclick="setStars('bathroom',2)">⭐</button><button class="star-btn" onclick="setStars('bathroom',3)">⭐</button></div>
+          <textarea class="grade-comment" id="cm-bathroom" placeholder="ความคิดเห็นครู..." oninput="updateComment('bathroom')"></textarea>
+        </div>
+        <div class="comment-display" id="cd-bathroom"></div>
+      </div>
+    </div>
+
+    <!-- Home -->
+    <div class="zone zone-home" id="zone-home">
+      <div class="zone-head"><span class="zone-icon">🔋</span><div class="zone-title-wrap"><div class="zone-name">สิ่งของในบ้าน</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่ฉันพบ</div><textarea id="home-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เกิดขึ้น</div><textarea id="home-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ย้อนกลับได้ไหม? เพราะอะไร?</div><textarea id="home-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div style="display:flex;align-items:center;">
+          <div class="zone-stars" id="stars-home"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+          <div class="zone-xp-earned" id="xp-home"></div>
+        </div>
+        <div class="grade-panel" id="gp-home">
+          <div class="grade-label">ให้คะแนน (กดดาว)</div>
+          <div class="star-picker" id="pk-home"><button class="star-btn" onclick="setStars('home',1)">⭐</button><button class="star-btn" onclick="setStars('home',2)">⭐</button><button class="star-btn" onclick="setStars('home',3)">⭐</button></div>
+          <textarea class="grade-comment" id="cm-home" placeholder="ความคิดเห็นครู..." oninput="updateComment('home')"></textarea>
+        </div>
+        <div class="comment-display" id="cd-home"></div>
+      </div>
+    </div>
+
+    <!-- Nature -->
+    <div class="zone zone-nature" id="zone-nature">
+      <div class="zone-head"><span class="zone-icon">🌿</span><div class="zone-title-wrap"><div class="zone-name">ธรรมชาติรอบตัว</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่ฉันพบ</div><textarea id="nature-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เกิดขึ้น</div><textarea id="nature-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ย้อนกลับได้ไหม? เพราะอะไร?</div><textarea id="nature-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div style="display:flex;align-items:center;">
+          <div class="zone-stars" id="stars-nature"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+          <div class="zone-xp-earned" id="xp-nature"></div>
+        </div>
+        <div class="grade-panel" id="gp-nature">
+          <div class="grade-label">ให้คะแนน (กดดาว)</div>
+          <div class="star-picker" id="pk-nature"><button class="star-btn" onclick="setStars('nature',1)">⭐</button><button class="star-btn" onclick="setStars('nature',2)">⭐</button><button class="star-btn" onclick="setStars('nature',3)">⭐</button></div>
+          <textarea class="grade-comment" id="cm-nature" placeholder="ความคิดเห็นครู..." oninput="updateComment('nature')"></textarea>
+        </div>
+        <div class="comment-display" id="cd-nature"></div>
+      </div>
+    </div>
+
+    <!-- Food -->
+    <div class="zone zone-food" id="zone-food">
+      <div class="zone-head"><span class="zone-icon">🥤</span><div class="zone-title-wrap"><div class="zone-name">อาหาร / เครื่องดื่ม</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่ฉันพบ</div><textarea id="food-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เกิดขึ้น</div><textarea id="food-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ย้อนกลับได้ไหม? เพราะอะไร?</div><textarea id="food-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div style="display:flex;align-items:center;">
+          <div class="zone-stars" id="stars-food"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+          <div class="zone-xp-earned" id="xp-food"></div>
+        </div>
+        <div class="grade-panel" id="gp-food">
+          <div class="grade-label">ให้คะแนน (กดดาว)</div>
+          <div class="star-picker" id="pk-food"><button class="star-btn" onclick="setStars('food',1)">⭐</button><button class="star-btn" onclick="setStars('food',2)">⭐</button><button class="star-btn" onclick="setStars('food',3)">⭐</button></div>
+          <textarea class="grade-comment" id="cm-food" placeholder="ความคิดเห็นครู..." oninput="updateComment('food')"></textarea>
+        </div>
+        <div class="comment-display" id="cd-food"></div>
+      </div>
+    </div>
+
+    <!-- Bonus -->
+    <div class="zone zone-bonus" id="zone-bonus">
+      <div class="zone-head"><span class="zone-icon">🏆</span><div class="zone-title-wrap"><div class="zone-name">BONUS ZONE — เชื่อมโยง 2 โซนขึ้นไป!</div></div><span class="zone-xp-badge">สูงสุด 60 XP</span></div>
+      <div class="zone-body">
+        <div class="field"><div class="field-label">สิ่งที่พบใน 2 โซนหรือมากกว่า ที่มีเคมีคล้ายกัน</div><textarea id="bonus-1" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">เคมีที่เหมือนกัน / เชื่อมโยงได้</div><textarea id="bonus-2" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="field"><div class="field-label">ความแตกต่างระหว่างสองโซน</div><textarea id="bonus-3" placeholder="เขียนคำตอบของคุณที่นี่..." oninput="markFilled(this)"></textarea></div>
+        <div class="bottom-row" style="width:100%">
+          <div style="display:flex;align-items:center;">
+            <div class="zone-stars" id="stars-bonus"><span class="zone-star">⭐</span><span class="zone-star">⭐</span><span class="zone-star">⭐</span></div>
+            <div class="zone-xp-earned" id="xp-bonus"></div>
+          </div>
+          <div class="grade-panel" id="gp-bonus" style="margin-top:8px">
+            <div class="grade-label">ให้คะแนน (กดดาว)</div>
+            <div class="star-picker" id="pk-bonus"><button class="star-btn" onclick="setStars('bonus',1)">⭐</button><button class="star-btn" onclick="setStars('bonus',2)">⭐</button><button class="star-btn" onclick="setStars('bonus',3)">⭐</button></div>
+            <textarea class="grade-comment" id="cm-bonus" placeholder="ความคิดเห็นครู..." oninput="updateComment('bonus')"></textarea>
+          </div>
+          <div class="comment-display" id="cd-bonus"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submitted-banner" id="submitted-banner">
+    <div class="sub-icon">📬</div>
+    <div class="sub-title">ส่งงานแล้ว!</div>
+    <div class="sub-detail" id="sub-detail">รอครูตรวจให้คะแนน — ห้ามแก้ไขคำตอบแล้วนะ 😊</div>
+  </div>
+  <div class="submit-area" id="submit-area" style="display:none">
+    <button class="submit-btn" id="submit-btn" onclick="submitWork()">📤 ส่งงาน</button>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">เมื่อกดส่งแล้วจะแก้ไขคำตอบไม่ได้</div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div class="scoreboard">
+    <div class="score-title">⚡ SCOREBOARD</div>
+    <div class="score-zones">
+      <div class="score-zone-item"><div class="score-zone-icon">🍳</div><div class="score-zone-name">ห้องครัว</div><div class="score-zone-stars" id="sb-kitchen">☆☆☆</div><div class="score-zone-pts" id="sbp-kitchen">0</div></div>
+      <div class="score-zone-item"><div class="score-zone-icon">🧴</div><div class="score-zone-name">ห้องน้ำ</div><div class="score-zone-stars" id="sb-bathroom">☆☆☆</div><div class="score-zone-pts" id="sbp-bathroom">0</div></div>
+      <div class="score-zone-item"><div class="score-zone-icon">🔋</div><div class="score-zone-name">สิ่งของ</div><div class="score-zone-stars" id="sb-home">☆☆☆</div><div class="score-zone-pts" id="sbp-home">0</div></div>
+      <div class="score-zone-item"><div class="score-zone-icon">🌿</div><div class="score-zone-name">ธรรมชาติ</div><div class="score-zone-stars" id="sb-nature">☆☆☆</div><div class="score-zone-pts" id="sbp-nature">0</div></div>
+      <div class="score-zone-item"><div class="score-zone-icon">🥤</div><div class="score-zone-name">อาหาร</div><div class="score-zone-stars" id="sb-food">☆☆☆</div><div class="score-zone-pts" id="sbp-food">0</div></div>
+      <div class="score-zone-item"><div class="score-zone-icon">🏆</div><div class="score-zone-name">Bonus</div><div class="score-zone-stars" id="sb-bonus">☆☆☆</div><div class="score-zone-pts" id="sbp-bonus">0</div></div>
+    </div>
+    <div class="total-row">
+      <div>
+        <div style="font-size:13px;color:var(--muted)">คะแนนรวม</div>
+        <div class="total-xp" id="grand-xp">0 <span style="font-size:14px;color:var(--muted)">/ 300 XP</span></div>
+        <div class="total-grade" id="grand-grade" style="color:var(--muted)">รอครูตรวจ...</div>
+      </div>
+      <div class="rank-badge" id="rank-badge">—</div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Stars BG
+const starsEl = document.getElementById('stars');
+for(let i=0;i<80;i++){const s=document.createElement('div');s.className='star-dot';const sz=Math.random()*2+1;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*5}s`;starsEl.appendChild(s);}
+
+// Student submit
+let submitted = false;
+function submitWork(){
+  const name = document.getElementById('inp-name').value.trim();
+  const cls  = document.getElementById('inp-class').value.trim();
+  const num  = document.getElementById('inp-num').value.trim();
+  if(!name){ showToast('⚠️ กรุณาใส่ชื่อก่อนส่งงาน'); document.getElementById('inp-name').focus(); return; }
+
+  submitted = true;
+
+  // Lock all student inputs
+  document.querySelectorAll('.zone-body textarea:not(.grade-comment)').forEach(t=>t.disabled=true);
+  document.getElementById('inp-name').disabled=true;
+  document.getElementById('inp-class').disabled=true;
+  document.getElementById('inp-num').disabled=true;
+
+  // Show banner, hide submit button
+  document.getElementById('submit-area').style.display='none';
+  const banner = document.getElementById('submitted-banner');
+  banner.classList.add('visible');
+  const now = new Date().toLocaleString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  const info = [name, cls?`ชั้น ${cls}`:'', num?`เลขที่ ${num}`:''].filter(Boolean).join(' · ');
+  document.getElementById('sub-detail').innerHTML =
+    `<b style="color:var(--text)">${info}</b><br>ส่งเวลา ${now}<br>
+     <span style="color:var(--green)">ดาวน์โหลดไฟล์ด้านล่าง แล้วส่งให้ครูได้เลย 📁</span>`;
+
+  // Export filled HTML
+  exportHTML(name, cls, num, now);
+  showToast('ดาวน์โหลดไฟล์งานแล้ว! ส่งให้ครูได้เลย 📁');
+}
+
+function exportHTML(name, cls, num, now){
+  // Collect all answers
+  const answers = {};
+  ['kitchen','bathroom','home','nature','food','bonus'].forEach(z=>{
+    [1,2,3].forEach(i=>{
+      const el = document.getElementById(`${z}-${i}`);
+      answers[`${z}-${i}`] = el ? el.value : '';
+    });
+  });
+
+  // Clone current HTML and inject answers + metadata as data attributes
+  let html = document.documentElement.outerHTML;
+
+  // Inject a script block that pre-fills values on load
+  const injectScript = `
+<script id="prefill-data">
+(function(){
+  const STUDENT = ${JSON.stringify({name,cls,num,submittedAt:now})};
+  const ANSWERS = ${JSON.stringify(answers)};
+  window.addEventListener('DOMContentLoaded', function(){
+    // Fill name fields
+    const n=document.getElementById('inp-name'); if(n){n.value=STUDENT.name;}
+    const c=document.getElementById('inp-class'); if(c){c.value=STUDENT.cls;}
+    const u=document.getElementById('inp-num'); if(u){u.value=STUDENT.num;}
+    // Fill answers
+    Object.entries(ANSWERS).forEach(([id,val])=>{
+      const el=document.getElementById(id); if(el){el.value=val; el.classList.toggle('has-value',val.trim().length>2);}
+    });
+    // Auto-submit state (lock + show banner)
+    const sa=document.getElementById('submit-area'); if(sa) sa.style.display='none';
+    const sb=document.getElementById('submitted-banner'); if(sb) sb.classList.add('visible');
+    const sd=document.getElementById('sub-detail');
+    if(sd) sd.innerHTML='<b style="color:var(--text)">'+STUDENT.name+(STUDENT.cls?' · ชั้น '+STUDENT.cls:'')+(STUDENT.num?' · เลขที่ '+STUDENT.num:'')+'</b><br>ส่งเวลา '+STUDENT.submittedAt+'<br><span style="color:var(--teal)">ไฟล์ที่ส่งครูแล้ว — ครูกด 🔐 โหมดครู เพื่อให้คะแนน</span>';
+    document.querySelectorAll('.zone-body textarea:not(.grade-comment)').forEach(t=>t.disabled=true);
+    ['inp-name','inp-class','inp-num'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
+    if(typeof submitted!=='undefined') submitted=true;
+  });
+})();
+<\/script>`;
+
+  // Remove any existing prefill script, then inject before </body>
+  html = html.replace(/<script id="prefill-data">[\s\S]*?<\/script>/,'');
+  html = html.replace('</body>', injectScript + '</body>');
+
+  // Download
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const safeName = name.replace(/\s+/g,'_');
+  const safeClass = cls ? `_${cls.replace(/\//g,'-')}` : '';
+  const safeNum   = num ? `_เลขที่${num}` : '';
+  a.href = url;
+  a.download = `ChemQuest_${safeName}${safeClass}${safeNum}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Password — เปลี่ยนได้ตรงนี้
+const TEACHER_PW = '0000';
+let teacherMode = false;
+
+function openModal(){ document.getElementById('pw-modal').classList.add('open'); document.getElementById('pw-input').value=''; document.getElementById('pw-err').textContent=''; document.getElementById('pw-input').classList.remove('err'); setTimeout(()=>document.getElementById('pw-input').focus(),100); }
+function closeModal(){ document.getElementById('pw-modal').classList.remove('open'); }
+function checkPw(){
+  const v = document.getElementById('pw-input').value;
+  if(v===TEACHER_PW){ closeModal(); enterTeacher(); }
+  else {
+    const inp=document.getElementById('pw-input');
+    inp.classList.add('err'); document.getElementById('pw-err').textContent='รหัสผ่านไม่ถูกต้อง ลองใหม่';
+    setTimeout(()=>inp.classList.remove('err'),400);
+  }
+}
+
+function enterTeacher(){
+  teacherMode=true;
+  document.getElementById('teacher-banner').classList.add('visible');
+  const btn=document.getElementById('teacher-btn');
+  btn.textContent='✅ โหมดครู'; btn.style.borderColor='var(--purple)'; btn.style.color='var(--purple)';
+  btn.onclick=exitTeacher;
+  // Show grade panels, lock student textareas
+  document.querySelectorAll('.grade-panel').forEach(p=>p.classList.add('visible'));
+  document.querySelectorAll('.zone-body textarea:not(.grade-comment)').forEach(t=>t.disabled=true);
+  showToast('เข้าโหมดครูแล้ว — กดดาวเพื่อให้คะแนนแต่ละโซน ⭐');
+}
+
+function exitTeacher(){
+  teacherMode=false;
+  document.getElementById('teacher-banner').classList.remove('visible');
+  const btn=document.getElementById('teacher-btn');
+  btn.textContent='🔐 โหมดครู'; btn.style.borderColor=''; btn.style.color='';
+  btn.onclick=openModal;
+  document.querySelectorAll('.grade-panel').forEach(p=>p.classList.remove('visible'));
+  if(!submitted){
+    document.querySelectorAll('.zone-body textarea:not(.grade-comment)').forEach(t=>t.disabled=false);
+  }
+}
+
+// Student
+function markFilled(ta){ ta.classList.toggle('has-value', ta.value.trim().length>2); }
+
+// Teacher grading
+const ZONES=['kitchen','bathroom','home','nature','food','bonus'];
+const zoneStars={};
+ZONES.forEach(z=>zoneStars[z]=0);
+let prevTotal=0;
+
+function setStars(zone,n){
+  zoneStars[zone]=n;
+  // picker
+  document.querySelectorAll(`#pk-${zone} .star-btn`).forEach((b,i)=>b.classList.toggle('active',i<n));
+  // zone stars
+  document.querySelectorAll(`#stars-${zone} .zone-star`).forEach((el,i)=>{
+    if(i<n&&!el.classList.contains('lit')) el.classList.add('lit');
+    else if(i>=n) el.classList.remove('lit');
+  });
+  const xp=n*20;
+  document.getElementById(`xp-${zone}`).textContent=xp>0?`+${xp} XP`:'';
+  document.getElementById(`zone-${zone}`).classList.toggle('complete',n===3);
+  document.getElementById(`sb-${zone}`).textContent='⭐'.repeat(n)+'☆'.repeat(3-n);
+  document.getElementById(`sbp-${zone}`).textContent=xp;
+  const total=ZONES.reduce((a,z)=>a+zoneStars[z]*20,0);
+  updateTotal(total);
+  showFloatXP(`+${xp} XP`, document.getElementById(`pk-${zone}`));
+  showToast(n===3?'เยี่ยมมาก! เต็ม 3 ดาว 🌟':n===2?'ดี! 2 ดาว ⭐⭐':'ได้ 1 ดาว ⭐');
+}
+
+function updateComment(zone){
+  const v=document.getElementById(`cm-${zone}`).value;
+  document.getElementById(`cd-${zone}`).textContent=v?`💬 ครู: ${v}`:'';
+}
+
+function updateTotal(total){
+  const el=document.getElementById('total-xp');
+  if(total>prevTotal){el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),200);}
+  el.textContent=total; prevTotal=total;
+  document.getElementById('grand-xp').innerHTML=`${total} <span style="font-size:14px;color:var(--muted)">/ 300 XP</span>`;
+  document.getElementById('xp-bar').style.width=(total/300*100)+'%';
+  const p=total/300;
+  let g='รอครูตรวจ...',r='—',c='var(--muted)';
+  if(p>0&&p<0.34){g='นักสำรวจมือใหม่ 🔭';r='D';c='var(--coral)';}
+  else if(p<0.50){g='นักวิทย์รุ่นเยาว์ 🔬';r='C';c='var(--amber)';}
+  else if(p<0.67){g='นักเคมีฝึกหัด ⚗️';r='B';c='var(--blue)';}
+  else if(p<0.84){g='นักเคมีเก่ง 🧪';r='A';c='var(--green)';}
+  else if(p<1.0){g='นักเคมีขั้นเทพ 🌟';r='A+';c='var(--gold)';}
+  else if(p>=1.0&&total>0){g='🏆 CHEMISTRY MASTER!';r='S';c='var(--gold)';}
+  document.getElementById('grand-grade').textContent=g;
+  document.getElementById('grand-grade').style.color=c;
+  const rb=document.getElementById('rank-badge');
+  rb.textContent=r; rb.style.background=r==='—'?'var(--border)':c; rb.style.color='var(--bg)';
+}
+
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);}
+function showFloatXP(text,anchor){const rect=anchor.getBoundingClientRect();const el=document.createElement('div');el.className='float-xp';el.textContent=text;el.style.left=(rect.left+rect.width/2)+'px';el.style.top=rect.top+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
+</script>
+</body>
+</html>
